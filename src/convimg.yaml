@@ -1,0 +1,16 @@
+
+
+converts:
+    - name: icons
+      palette: xlibc
+      transparent-color-index: 0
+      style: rlet
+      images:
+        - main_icon
+        - vapor_indic
+
+outputs:
+    - type: c
+      include-file: graphics.h
+      converts:
+        - icons
