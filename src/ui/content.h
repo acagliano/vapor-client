@@ -49,21 +49,22 @@ enum _menu_items {
 typedef struct _library {
     char name[9];
     uint8_t type;
-    uint24_t crc;
+    uint32_t crc;
 } library_t;
 
 void ui_RenderBackground(void);
 void ui_ShowLibrary(bool show_upd);
 void ui_RenderContent(void);
 void lib_Init(void);
+void ui_ErrorWindow(const char* error_t, const char* error_m);
 
 uint8_t num_len(uint24_t num);
 uint8_t text_WrappedString(char *str, uint24_t left_margin, uint8_t top_margin, uint24_t right_margin);
 uint24_t text_CenterText(const char *string, const char c, uint24_t x, uint24_t w);
 void gfx_PrintStringCentered(const char* string, uint24_t x, uint8_t y, uint24_t w);
 
-uint24_t rc_crc32(uint32_t crc, const char *buf, size_t len);
+uint32_t crc32(const void *data, size_t n_bytes, uint32_t* crc);
 void library_update_entry(file_start_t* lib);
-uint24_t library_get_crc(const char* string, uint8_t type);
+uint32_t library_get_crc(const char* string, uint8_t type);
 
 #endif

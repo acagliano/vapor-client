@@ -2,7 +2,7 @@
 #include <debug.h>
 #include "network.h"
 
-char net_buf[2048];
+char net_buf[4096];
 size_t net_buf_size = 0;
 
 bool pipe_init() {

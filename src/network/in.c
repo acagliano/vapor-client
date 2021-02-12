@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
+#include <debug.h>
 #include "network.h"
 #include "controlcodes.h"
 #include "../ui/content.h"
@@ -12,11 +13,11 @@
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 const char* vapor_temp_file = "VTMP5100";
+char err_templ[50] = "invalid checksum error on downloaded file ";
 srv_list_t* services_arr=NULL;
 uint24_t services_arr_block_size=0;
 ti_var_t temp_fp;
 bool file_init_error=false;
-bool file_checksum_invalid=false;
 file_start_t file_data;
 
 void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
@@ -55,17 +56,23 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             break;
         case FILE_WRITE_END:
             {
+            uint32_t crc=0;
             file_start_t *packet = (void*)data;
-            if(!temp_fp) break;
-            if(rc_crc32(0, ti_GetDataPtr(temp_fp), ti_GetSize(temp_fp)) != packet->crc){
+            ti_Rewind(temp_fp);
+            crc32(ti_GetDataPtr(temp_fp), ti_GetSize(temp_fp), &crc);
+            if(crc != packet->crc){
                 ti_Close(temp_fp);
+                char err_txt[50] = {'\0'};
+                strcpy(err_txt, err_templ);
+                strcat(err_txt, packet->name);
+                ui_ErrorWindow("==SERVER ERROR==", err_txt);
                 ti_DeleteVar(vapor_temp_file, packet->type);
-                file_checksum_invalid=true;
                 break;
             }
             ti_SetArchiveStatus(packet->archive, temp_fp);
             ti_Close(temp_fp);
-            ti_Rename(vapor_temp_file, packet->name);
+            ti_DeleteVar(packet->name, packet->type);
+            ti_RenameVar(vapor_temp_file, packet->name, packet->type);
             library_update_entry(packet);
             break;
             }
@@ -73,30 +80,19 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             {
                 srv_deps_t *packet = (void*)data;
                 uint24_t ct=data_size/sizeof(srv_deps_t), i;
-                dep_info_t *info = malloc(ct * sizeof(dep_info_t));
+                dep_info_t info[16] = {0};
                 gfx_FillRectangleColor(76, 0, 320-77, 240, BG_COLOR);
                 for(i=0; i<ct; i++){
                     strncpy(info[i].name, packet[i].name, 8);
                     info[i].type = packet[i].type;
                     info[i].crc = library_get_crc(packet[i].name, packet[i].type);
                 }
-                ntwk_send(SRVC_GET_DLS, PS_PTR(info, ct));
+                ntwk_send(SRVC_GET_DLS, PS_PTR(info, ct * sizeof(dep_info_t)));
                 break;
             }
         case SERVER_ERROR:
         {
-            uint8_t color = gfx_SetTextFGColor(231);
-            gfx_FillRectangleColor(127, 80, 140, 80, 224);
-            gfx_FillRectangleColor(129, 92, 136, 66, 231);
-            
-            gfx_PrintStringCentered("==SERVER ERROR==", 127, 83, 140);
-            gfx_SetTextFGColor(192);
-            text_WrappedString(data, 133, 96, 260);
-            gfx_PrintStringXY("Any key to dismiss", 131, 148);
-            gfx_BlitRectangle(gfx_buffer, 127, 80, 140, 80);
-            while(!getKey());
-            queue_update=true;
-            gfx_SetTextFGColor(color);
+            ui_ErrorWindow("==SERVER ERROR==", data);
             break;
         }
     }

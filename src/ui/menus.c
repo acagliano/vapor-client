@@ -19,6 +19,13 @@ char nav_bar_text[][10]={
     "\31"
 };
 
+char nav_opts_btm[][10]={
+    "Pkg Upd",
+    "Plchld",
+    "Srv List",
+    "Srv Join"
+};
+
 
 void ui_button_indic(const char* string, const char c, uint24_t x, uint8_t y, uint24_t w, uint8_t h, bool center_text, bool active){
     gfx_RectangleColor(x, y, w, h, 0);
@@ -47,7 +54,7 @@ void ui_RenderNavBar(void){
     ui_render_vapor_status();
     ui_button_indic(NULL, 30, 96, 240-20, 32, 20, true, false);
     ui_button_indic(NULL, 31, 128, 240-20, 32, 20, true, false);
-    ui_button_indic("Refresh", 0, 160, 240-20, 80, 20, true, false);
-    ui_button_indic("Join Srvc", 0, 240, 240-20, 80, 20, true, false);
+    ui_button_indic(nav_opts_btm[(menu_item_selected-1)*2], 0, 160, 240-20, 80, 20, true, false);
+    ui_button_indic(nav_opts_btm[(menu_item_selected-1)*2+1], 0, 240, 240-20, 80, 20, true, false);
     gfx_SetTextFGColor(color);
 }

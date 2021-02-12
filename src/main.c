@@ -66,7 +66,7 @@ int main(void) {
    
     ntwk_init();
     
-    
+    ti_SetGCBehavior(&gfx_End, &gfx_Begin);
     gfx_SetDefaultPalette(gfx_8bpp);
     gfx_SetDrawBuffer();
     gfx_SetTextTransparentColor(1);
@@ -117,6 +117,7 @@ int main(void) {
         if(queue_update) {ui_RenderContent(); queue_update=false;}
     } while(1);
     //cache_purge();
+    ti_CloseAll();
     free(services_arr);
     gfx_End();
     usb_Cleanup();

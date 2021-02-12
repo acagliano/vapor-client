@@ -47,7 +47,7 @@ typedef struct {
 extern net_mode_t mode_srl;
 extern net_mode_t mode_pipe;
 
-extern char net_buf[2048];
+extern char net_buf[4096];
 extern size_t net_buf_size;
 
 bool ntwk_init(void);
@@ -58,7 +58,7 @@ bool ntwk_send_(uint8_t num_parts, uint8_t ctrl, ...);
 #define PS_STR(str) (str), 1+strlen(str)
 #define PS_VAL(val) (&val), sizeof(val)
 #define PS_ARR(arr) (arr), sizeof(arr)
-#define PS_PTR(ptr, size) (ptr), (size*sizeof(*ptr))
+#define PS_PTR(ptr, size) (ptr), (size)
 
 #define ntwk_send(ctrl_code, ...) ntwk_send_(VA_NARGS(__VA_ARGS__) / 2, ctrl_code, __VA_ARGS__)
 #define ntwk_send_nodata(ctrl_code) ntwk_send_(0, ctrl_code)

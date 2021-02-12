@@ -2,6 +2,7 @@
 #include "content.h"
 #include "../gfx/graphics.h"
 #include "../network/srv_types.h"
+#include "../asm/functions.h"
 
 
 
@@ -33,3 +34,17 @@ void ui_RenderContent(void){
     gfx_BlitBuffer();
 }
 
+void ui_ErrorWindow(const char* error_t, const char* error_m){
+    uint8_t color = gfx_SetTextFGColor(231);
+    gfx_FillRectangleColor(127, 80, 140, 80, 224);
+    gfx_FillRectangleColor(129, 92, 136, 66, 231);
+    gfx_PrintStringCentered(error_t, 127, 83, 140);
+    gfx_SetTextFGColor(192);
+    text_WrappedString(error_m, 133, 96, 260);
+    gfx_PrintStringXY("Any key to dismiss", 131, 148);
+    gfx_BlitRectangle(gfx_buffer, 127, 80, 140, 80);
+    gfx_SetTextFGColor(color);
+    while(!getKey());
+    queue_update = true;
+    
+}

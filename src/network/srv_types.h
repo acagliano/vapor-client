@@ -18,7 +18,7 @@ enum _vapor_status {
 typedef struct _srv_pkg_list {
     char name[9];
     uint8_t type;
-    uint24_t crc;
+    uint32_t crc;
 } srv_pkg_list_t;
 
 // Define Services List Type
