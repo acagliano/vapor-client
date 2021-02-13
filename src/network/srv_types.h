@@ -38,4 +38,25 @@ typedef struct _srv_deps {
 } srv_deps_t;
 typedef srv_pkg_list_t dep_info_t;
 
+enum _dl_status {
+    DL_WAIT,
+    DL_SKIP,
+    DL_VERIFY,
+    DL_DONE,
+    DL_CRC_ERR,
+    DL_IO_ERR
+};
+typedef struct dl_list {
+    char name[9];
+    uint8_t type;
+    uint32_t crc;
+    uint8_t status;
+} dl_list_t;
+extern dl_list_t *dl_list;
+extern uint8_t curr_dl;
+extern uint8_t curr_total;
+
+extern size_t dl_size;
+extern size_t bytes_copied;
+
 #endif

@@ -11,12 +11,12 @@ enum ControlCodes {
     FETCH_SOFTWARE_INFO,
     
     SRVC_GET_REQ = 0x20,
-    SRVC_REQ_INFO,
-    SRVC_GET_DLS,
+    SRVC_REQ_LIST,
     
     FILE_WRITE_START = 0x40,
     FILE_WRITE_DATA,
     FILE_WRITE_END,
+    FILE_WRITE_SKIP,
     FILE_CHECK_UP_TO_DATE,
     
     LIBRARY_CHECK_CRC = 0x50,
@@ -27,6 +27,7 @@ enum ControlCodes {
     MESSAGE = 0xf0,
     BRIDGE_ERROR = 0xf1,
     SERVER_ERROR = 0xf2,
+    SERVER_SUCCESS = 0xf3,
     PING = 0xfc,
 };
 

@@ -12,7 +12,7 @@ void ui_ShowLibrary(bool show_upd){
     library_t libinfo;
     uint24_t i=0;
     uint8_t y=10;
-    char cs_string[11] = {'\0'};
+    char cs_string[13] = {'\0'};
     if(!libfile){
         text_WrappedString(no_lib_err, 90, 15, 310);
         gfx_BlitRectangle(gfx_buffer, 76, 0, 320-77, 240);
@@ -21,12 +21,12 @@ void ui_ShowLibrary(bool show_upd){
         return;
     }
     for(i=0; ti_Read(&libinfo, sizeof(library_t), 1, libfile); i++){
-        gfx_PrintStringXY(libinfo.name, 85, i*10+y);
+        gfx_PrintStringXY(libinfo.name, 80, i*10+y);
         gfx_PrintStringXY("type: ", 150, i*10+y);
         if(libinfo.type==TI_APPVAR_TYPE) gfx_PrintString("appv");
         else gfx_PrintString("prgm");
         gfx_SetTextXY(250, i*10+y);
-        sprintf(cs_string, "%xh", libinfo.crc);
+        sprintf(cs_string, "%lx", libinfo.crc);
         gfx_PrintString(cs_string);
     }
     ti_Close(libfile);
@@ -81,6 +81,7 @@ void lib_Init(void){
 
 void library_update_entry(file_start_t* lib){
     library_t new_lib;
+    memset(&new_lib, '\0', sizeof(library_t));
     strncpy(new_lib.name, lib->name, 8);
     new_lib.type = lib->type;
     new_lib.crc = lib->crc;
@@ -88,6 +89,10 @@ void library_update_entry(file_start_t* lib){
 }
 
 uint32_t library_get_crc(const char* name, uint8_t type){
+    ti_var_t tf;
+    if(!(tf=ti_OpenVar(name, "r",type)))
+        return 0;
+    ti_Close(tf);
     library_t *lib = library_get_entry(name, type);
     if(lib==NULL) return 0;
     return lib->crc;

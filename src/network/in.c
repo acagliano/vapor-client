@@ -18,7 +18,13 @@ srv_list_t* services_arr=NULL;
 uint24_t services_arr_block_size=0;
 ti_var_t temp_fp;
 bool file_init_error=false;
+bool file_install_error=false;
 file_start_t file_data;
+uint8_t curr_dl = 0;
+uint8_t curr_total = 0;
+dl_list_t *dl_list = NULL;
+size_t dl_size = 0;
+size_t bytes_copied = 0;
 
 void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
     size_t data_size = buff_size-1;
@@ -27,7 +33,9 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
     uint8_t* data = &in_buff->data[0];      // for handlers needing arbitrary data
     switch(ctl){
         case CONNECT:
+            break;
         case DISCONNECT:
+            vapor_status=false;
             break;
             
         case WELCOME:
@@ -46,27 +54,41 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             break;
         case FILE_WRITE_START:
         {
-            temp_fp=ti_OpenVar(vapor_temp_file, "w", response);
-            if(!temp_fp) file_init_error = true;
+            struct {
+                uint24_t size;
+            } *packet = (void*)data;
+            temp_fp=ti_OpenVar(vapor_temp_file, "w", dl_list[curr_dl].type);
+            if(!temp_fp) {
+                dl_list[curr_dl].status = DL_IO_ERR;
+                break;
+            }
+            dl_size = packet->size;
+            bytes_copied = 0;
+            srvc_show_dl_bar();
             break;
         }
         case FILE_WRITE_DATA:
             if(!temp_fp) break;
             ti_Write(data, data_size, 1, temp_fp);
+            bytes_copied += data_size;
+            srvc_show_dl_bar();
             break;
         case FILE_WRITE_END:
             {
             uint32_t crc=0;
+            char success_str[50] = {'\0'};
             file_start_t *packet = (void*)data;
+            strcpy(success_str, "successfully installed file ");
+            srvc_show_dl_bar();
+            strcat(success_str, packet->name);
             ti_Rewind(temp_fp);
+            dl_list[curr_dl].status = DL_VERIFY;
+            srvc_show_dl_list();
             crc32(ti_GetDataPtr(temp_fp), ti_GetSize(temp_fp), &crc);
             if(crc != packet->crc){
                 ti_Close(temp_fp);
-                char err_txt[50] = {'\0'};
-                strcpy(err_txt, err_templ);
-                strcat(err_txt, packet->name);
-                ui_ErrorWindow("==SERVER ERROR==", err_txt);
                 ti_DeleteVar(vapor_temp_file, packet->type);
+                dl_list[curr_dl].status = DL_CRC_ERR;
                 break;
             }
             ti_SetArchiveStatus(packet->archive, temp_fp);
@@ -74,27 +96,35 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             ti_DeleteVar(packet->name, packet->type);
             ti_RenameVar(vapor_temp_file, packet->name, packet->type);
             library_update_entry(packet);
-            break;
+            dl_list[curr_dl].status = DL_DONE;
             }
-        case SRVC_REQ_INFO:
+        case FILE_WRITE_SKIP:
+            if(dl_list[curr_dl].status != DL_DONE)
+                dl_list[curr_dl].status = DL_SKIP;
+            srvc_show_dl_list();
+            curr_dl++;
+            if(curr_dl < curr_total)
+                srvc_request_file(&dl_list[curr_dl]);
+            else free(dl_list);
+            break;
+        
+        case SRVC_REQ_LIST:
             {
-                srv_deps_t *packet = (void*)data;
-                uint24_t ct=data_size/sizeof(srv_deps_t), i;
-                dep_info_t info[16] = {0};
-                gfx_FillRectangleColor(76, 0, 320-77, 240, BG_COLOR);
-                for(i=0; i<ct; i++){
-                    strncpy(info[i].name, packet[i].name, 8);
-                    info[i].type = packet[i].type;
-                    info[i].crc = library_get_crc(packet[i].name, packet[i].type);
-                }
-                ntwk_send(SRVC_GET_DLS, PS_PTR(info, ct * sizeof(dep_info_t)));
+                dl_list_t *packet = (void*)data;
+                dl_list = malloc(data_size);
+                memcpy(dl_list, packet, data_size);
+                curr_total = data_size/sizeof(dl_list_t);
+                curr_dl = 0;
+                srvc_request_file(&dl_list[curr_dl]);
+                srvc_show_dl_list();
                 break;
             }
         case SERVER_ERROR:
-        {
             ui_ErrorWindow("==SERVER ERROR==", data);
             break;
-        }
+        case SERVER_SUCCESS:
+            ui_SuccessWindow("==SERVER ACTION==", data)
+            break;
     }
 }
 

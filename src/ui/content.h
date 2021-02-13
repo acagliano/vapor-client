@@ -5,7 +5,8 @@
 #include <stdint.h>
 #include <graphx.h>
 #include <stdbool.h>
-#include "fileaccess.h"
+#include "../fileaccess.h"
+#include "../network/srv_types.h"
 
 #define gfx_RestoreCanvas() \
         gfx_FillScreen(BG_COLOR)
@@ -52,11 +53,16 @@ typedef struct _library {
     uint32_t crc;
 } library_t;
 
+
 void ui_RenderBackground(void);
 void ui_ShowLibrary(bool show_upd);
 void ui_RenderContent(void);
 void lib_Init(void);
-void ui_ErrorWindow(const char* error_t, const char* error_m);
+void ui_RenderNavBar(void);
+void ui_RenderServicesContent(void);
+void ui_ContentWindow(const char* error_t, const char* error_m, uint8_t border_color);
+#define ui_ErrorWindow(title, msg)      ui_ContentWindow((title), (msg), (224));
+#define ui_SuccessWindow(title, msg)    ui_ContentWindow((title), (msg), (36));
 
 uint8_t num_len(uint24_t num);
 uint8_t text_WrappedString(char *str, uint24_t left_margin, uint8_t top_margin, uint24_t right_margin);
@@ -66,5 +72,9 @@ void gfx_PrintStringCentered(const char* string, uint24_t x, uint8_t y, uint24_t
 uint32_t crc32(const void *data, size_t n_bytes, uint32_t* crc);
 void library_update_entry(file_start_t* lib);
 uint32_t library_get_crc(const char* string, uint8_t type);
+
+void srvc_show_dl_list(void);
+void srvc_request_file(dl_list_t* dl);
+void srvc_show_dl_bar(void);
 
 #endif

@@ -1,5 +1,10 @@
 
+#include <stdint.h>
+#include <stddef.h>
+#include <tice.h>
 #include "content.h"
+#include "../network/controlcodes.h"
+#include "../network/network.h"
 #include "../network/srv_types.h"
 
 
@@ -24,4 +29,45 @@ void ui_RenderServicesContent(void){
         gfx_PrintUIntSize(services_arr[i].port);
     }
     gfx_SetTextFGColor(color);
+}
+
+
+void srvc_request_file(dl_list_t* dl){
+    dl->crc = library_get_crc(dl->name, dl->type);
+    ntwk_send(FILE_WRITE_START, PS_PTR(dl, sizeof(dl_list_t)));
+}
+
+void srvc_show_dl_list(void){
+    uint8_t h = 10 * curr_total + 20;
+    uint8_t y_init = 120 - (h / 2);
+    uint24_t i;
+    uint8_t color = gfx_SetTextFGColor(231);
+    gfx_FillRectangleColor(60, y_init - 12, 200, h, 33);
+    gfx_FillRectangleColor(62, y_init, 196, h - 14, 231);
+    gfx_PrintStringCentered("=DOWNLOADING=", 60, y_init-10, 200);
+    gfx_SetTextFGColor(192);
+    for(i=0; i<curr_total; i++){
+        uint8_t y = (10 * i) + y_init + 4;
+        uint8_t status = dl_list[i].status;
+        gfx_PrintStringXY(dl_list[i].name, 64, y);
+        if(status == DL_WAIT) gfx_PrintStringXY("waiting", 140, y);
+        else if(status == DL_SKIP) gfx_PrintStringXY("skipped", 140, y);
+        else if(status == DL_VERIFY) gfx_PrintStringXY("checking crc", 140, y);
+        else if(status == DL_DONE) gfx_PrintStringXY("done", 140, y);
+        else if((status == DL_CRC_ERR) || (status == DL_IO_ERR)) gfx_PrintStringXY("error", 140, y);
+    }
+    gfx_SetTextFGColor(color);
+    gfx_BlitRectangle(gfx_buffer, 60, y_init-12, 200, h);
+    for(i=0; i<100; i++) boot_WaitShort();
+    
+}
+
+void srvc_show_dl_bar(void){
+    uint8_t h = 10 * curr_total + 20;
+    uint8_t y_init = 120 - (h / 2);
+    uint8_t y = (10 * curr_dl) + y_init + 4;
+    uint24_t barw = bytes_copied * 68 / dl_size;
+    gfx_RectangleColor(138, y, 70, 8, 0);
+    gfx_FillRectangleColor(139, y, barw, 8, 228);
+    gfx_BlitRectangle(gfx_buffer, 138, y, 70, 10);
 }
