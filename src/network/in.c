@@ -15,7 +15,7 @@
 const char* vapor_temp_file = "VTMP5100";
 srv_list_t* services_arr=NULL;
 uint24_t services_arr_block_size=0;
-ti_var_t temp_fp;
+ti_var_t temp_fp = 0;
 bool file_init_error=false;
 bool file_install_error=false;
 file_start_t file_data;
