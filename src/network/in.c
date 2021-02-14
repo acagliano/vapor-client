@@ -13,7 +13,6 @@
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 const char* vapor_temp_file = "VTMP5100";
-char err_templ[50] = "invalid checksum error on downloaded file ";
 srv_list_t* services_arr=NULL;
 uint24_t services_arr_block_size=0;
 ti_var_t temp_fp;
@@ -76,11 +75,8 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
         case FILE_WRITE_END:
             {
             uint32_t crc=0;
-            char success_str[50] = {'\0'};
             file_start_t *packet = (void*)data;
-            strcpy(success_str, "successfully installed file ");
             srvc_show_dl_bar();
-            strcat(success_str, packet->name);
             ti_Rewind(temp_fp);
             dl_list[curr_dl].status = DL_VERIFY;
             srvc_show_dl_list();
