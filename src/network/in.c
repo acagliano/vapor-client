@@ -61,7 +61,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 dl_list[curr_dl].status = DL_IO_ERR;
                 break;
             }
-            dl_size = packet->size;
+            dl_list[curr_dl].size=packet->size;
             bytes_copied = 0;
             srvc_show_dl_bar();
             break;
@@ -75,13 +75,14 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
         case FILE_WRITE_END:
             {
             uint32_t crc=0;
+            size_t bytes_written = ti_GetSize(temp_fp);
             file_start_t *packet = (void*)data;
             srvc_show_dl_bar();
             ti_Rewind(temp_fp);
             dl_list[curr_dl].status = DL_VERIFY;
             srvc_show_dl_list();
-            crc32(ti_GetDataPtr(temp_fp), ti_GetSize(temp_fp), &crc);
-            if(crc != packet->crc){
+            crc32(ti_GetDataPtr(temp_fp), bytes_written, &crc);
+            if((crc != packet->crc) || (bytes_written != dl_list[curr_dl].size)){
                 ti_Close(temp_fp);
                 ti_DeleteVar(vapor_temp_file, packet->type);
                 dl_list[curr_dl].status = DL_CRC_ERR;

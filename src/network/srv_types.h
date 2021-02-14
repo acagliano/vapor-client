@@ -49,6 +49,7 @@ enum _dl_status {
 typedef struct dl_list {
     char name[9];
     uint8_t type;
+    size_t size;
     uint32_t crc;
     uint8_t status;
 } dl_list_t;

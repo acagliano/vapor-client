@@ -66,7 +66,7 @@ void srvc_show_dl_bar(void){
     uint8_t h = 10 * curr_total + 20;
     uint8_t y_init = 120 - (h / 2);
     uint8_t y = (10 * curr_dl) + y_init + 4;
-    uint24_t barw = bytes_copied * 68 / dl_size;
+    uint24_t barw = bytes_copied * 68 / dl_list[curr_dl].size;
     gfx_RectangleColor(138, y, 70, 8, 0);
     gfx_FillRectangleColor(139, y, barw, 8, 228);
     gfx_BlitRectangle(gfx_buffer, 138, y, 70, 10);
