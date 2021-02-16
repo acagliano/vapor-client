@@ -22,11 +22,11 @@ enum ControlCodes {
     LIBRARY_CHECK_CRC = 0x50,
     LIBRARY_UPDATE_ITEM,
     
+    
     // DEBUG: 0xf*
     WELCOME = 0xd0,
     MESSAGE = 0xf0,
     BRIDGE_ERROR = 0xf1,
-    SERVER_ERROR = 0xf2,
     SERVER_SUCCESS = 0xf3,
     PING = 0xfc,
 };

@@ -50,7 +50,7 @@ enum _menu_items {
 typedef struct _library {
     char name[9];
     uint8_t type;
-    uint32_t crc;
+    date_t date;
 } library_t;
 
 
@@ -70,8 +70,8 @@ uint24_t text_CenterText(const char *string, const char c, uint24_t x, uint24_t 
 void gfx_PrintStringCentered(const char* string, uint24_t x, uint8_t y, uint24_t w);
 
 uint32_t crc32(const void *data, size_t n_bytes, uint32_t* crc);
-void library_update_entry(file_start_t* lib);
-uint32_t library_get_crc(const char* string, uint8_t type);
+bool library_set_entry(library_t* libr);
+void library_load_date(dl_list_t* dl);
 
 void srvc_show_dl_list(void);
 void srvc_request_file(dl_list_t* dl);

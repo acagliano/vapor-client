@@ -4,7 +4,7 @@
 
 NAME         ?= VAPOR
 ICON         ?= icon.png
-DESCRIPTION  ?= "UNO Card Game"
+DESCRIPTION  ?= "VAPOR Networking"
 MAIN_ARGS    ?= NO
 COMPRESSED   ?= NO
 ARCHIVED     ?= NO

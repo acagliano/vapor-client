@@ -33,7 +33,7 @@ void ui_RenderServicesContent(void){
 
 
 void srvc_request_file(dl_list_t* dl){
-    dl->crc = library_get_crc(dl->name, dl->type);
+    library_load_date(dl);
     ntwk_send(FILE_WRITE_START, PS_PTR(dl, sizeof(dl_list_t)));
 }
 
@@ -52,7 +52,8 @@ void srvc_show_dl_list(void){
         gfx_PrintStringXY(dl_list[i].name, 64, y);
         if(status == DL_WAIT) gfx_PrintStringXY("waiting", 140, y);
         else if(status == DL_SKIP) gfx_PrintStringXY("skipped", 140, y);
-        else if(status == DL_VERIFY) gfx_PrintStringXY("checking crc", 140, y);
+        else if(status == DL_IO_ERR) gfx_PrintStringXY("srv.IOErr", 140, y);
+        else if(status == DL_VERIFY) gfx_PrintStringXY("validating", 140, y);
         else if(status == DL_DONE) gfx_PrintStringXY("done", 140, y);
         else if((status == DL_CRC_ERR) || (status == DL_IO_ERR)) gfx_PrintStringXY("error", 140, y);
     }

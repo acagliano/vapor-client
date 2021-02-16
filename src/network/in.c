@@ -73,36 +73,41 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             srvc_show_dl_bar();
             break;
         case FILE_WRITE_END:
-            {
-            uint32_t crc=0;
-            size_t bytes_written = ti_GetSize(temp_fp);
+        {
             file_start_t *packet = (void*)data;
-            srvc_show_dl_bar();
-            ti_Rewind(temp_fp);
-            dl_list[curr_dl].status = DL_VERIFY;
-            srvc_show_dl_list();
-            crc32(ti_GetDataPtr(temp_fp), bytes_written, &crc);
-            if((crc != packet->crc) || (bytes_written != dl_list[curr_dl].size)){
-                ti_Close(temp_fp);
-                ti_DeleteVar(vapor_temp_file, packet->type);
-                dl_list[curr_dl].status = DL_CRC_ERR;
-                break;
+            if(temp_fp){
+                srvc_show_dl_bar();
+                ti_Rewind(temp_fp);
+                dl_list[curr_dl].status = DL_VERIFY;
+                srvc_show_dl_list();
+                if(ti_GetSize(temp_fp) == dl_list[curr_dl].size){
+                    library_t addme;
+                    memcpy(&addme, packet, sizeof(library_t));
+                    ti_SetArchiveStatus(packet->archive, temp_fp);
+                    ti_Close(temp_fp);
+                    ti_DeleteVar(packet->name, packet->type);
+                    ti_RenameVar(vapor_temp_file, packet->name, packet->type);
+                    library_set_entry(&addme);
+                    dl_list[curr_dl].status = DL_DONE;
+                }
+                else {
+                    ti_Close(temp_fp);
+                    ti_DeleteVar(vapor_temp_file, packet->type);
+                    dl_list[curr_dl].status = DL_CRC_ERR;
+                }
             }
-            ti_SetArchiveStatus(packet->archive, temp_fp);
-            ti_Close(temp_fp);
-            ti_DeleteVar(packet->name, packet->type);
-            ti_RenameVar(vapor_temp_file, packet->name, packet->type);
-            library_update_entry(packet);
-            dl_list[curr_dl].status = DL_DONE;
-            }
+        }
         case FILE_WRITE_SKIP:
             if(dl_list[curr_dl].status != DL_DONE)
-                dl_list[curr_dl].status = DL_SKIP;
+                dl_list[curr_dl].status = response;
             srvc_show_dl_list();
             curr_dl++;
             if(curr_dl < curr_total)
                 srvc_request_file(&dl_list[curr_dl]);
-            else free(dl_list);
+            else {
+                free(dl_list);
+                queue_update=true;
+            }
             break;
         
         case SRVC_REQ_LIST:
@@ -116,9 +121,6 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 srvc_show_dl_list();
                 break;
             }
-        case SERVER_ERROR:
-            ui_ErrorWindow("==SERVER ERROR==", data);
-            break;
         case SERVER_SUCCESS:
             ui_SuccessWindow("==SERVER ACTION==", data)
             break;

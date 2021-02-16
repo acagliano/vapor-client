@@ -6,6 +6,12 @@
 #include <stdint.h> 
 #include <stdbool.h>
 
+typedef struct _date {
+    uint24_t year;
+    uint8_t month;
+    uint8_t day;
+} date_t;
+
 extern uint8_t vapor_status;
 extern uint24_t vapor_timeout;
 enum _vapor_status {
@@ -18,7 +24,7 @@ enum _vapor_status {
 typedef struct _srv_pkg_list {
     char name[9];
     uint8_t type;
-    uint32_t crc;
+    date_t date;
 } srv_pkg_list_t;
 
 // Define Services List Type
@@ -50,7 +56,7 @@ typedef struct dl_list {
     char name[9];
     uint8_t type;
     size_t size;
-    uint32_t crc;
+    date_t date;
     uint8_t status;
 } dl_list_t;
 extern dl_list_t *dl_list;
