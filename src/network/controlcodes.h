@@ -11,7 +11,6 @@ enum ControlCodes {
     FETCH_SOFTWARE_INFO,
     
     SRVC_GET_REQ = 0x20,
-    SRVC_REQ_LIST,
     
     FILE_WRITE_START = 0x40,
     FILE_WRITE_DATA,

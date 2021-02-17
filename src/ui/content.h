@@ -65,7 +65,7 @@ void ui_ContentWindow(const char* error_t, const char* error_m, uint8_t border_c
 #define ui_SuccessWindow(title, msg)    ui_ContentWindow((title), (msg), (36));
 
 uint8_t num_len(uint24_t num);
-uint8_t text_WrappedString(char *str, uint24_t left_margin, uint8_t top_margin, uint24_t right_margin);
+uint8_t text_WrappedString(const char *str, uint24_t left_margin, uint8_t top_margin, uint24_t right_margin);
 uint24_t text_CenterText(const char *string, const char c, uint24_t x, uint24_t w);
 void gfx_PrintStringCentered(const char* string, uint24_t x, uint8_t y, uint24_t w);
 

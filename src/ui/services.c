@@ -55,7 +55,7 @@ void srvc_show_dl_list(void){
         else if(status == DL_IO_ERR) gfx_PrintStringXY("srv.IOErr", 140, y);
         else if(status == DL_VERIFY) gfx_PrintStringXY("validating", 140, y);
         else if(status == DL_DONE) gfx_PrintStringXY("done", 140, y);
-        else if((status == DL_CRC_ERR) || (status == DL_IO_ERR)) gfx_PrintStringXY("error", 140, y);
+        else if(status == DL_VERIF_ERR) gfx_PrintStringXY("dl error", 140, y);
     }
     gfx_SetTextFGColor(color);
     gfx_BlitRectangle(gfx_buffer, 60, y_init-12, 200, h);

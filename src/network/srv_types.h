@@ -49,7 +49,7 @@ enum _dl_status {
     DL_SKIP,
     DL_VERIFY,
     DL_DONE,
-    DL_CRC_ERR,
+    DL_VERIF_ERR,
     DL_IO_ERR
 };
 typedef struct dl_list {

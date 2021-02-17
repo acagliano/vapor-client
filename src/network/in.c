@@ -93,7 +93,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 else {
                     ti_Close(temp_fp);
                     ti_DeleteVar(vapor_temp_file, packet->type);
-                    dl_list[curr_dl].status = DL_CRC_ERR;
+                    dl_list[curr_dl].status = DL_VERIF_ERR;
                 }
             }
         }
@@ -110,7 +110,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             }
             break;
         
-        case SRVC_REQ_LIST:
+        case SRVC_GET_REQ:
             {
                 dl_list_t *packet = (void*)data;
                 dl_list = malloc(data_size);
