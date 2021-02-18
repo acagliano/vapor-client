@@ -69,9 +69,10 @@ void lib_Init(void){
     ti_var_t lf=ti_Open(library_var, "r+");
     if(lf){ ti_Close(lf); return; }
     else {
+        date_t date={2021, 2, 18};
         ti_var_t tf=ti_OpenVar("VAPOR", "r", TI_PPRGM_TYPE);
         ti_Close(tf);
-        library_t libinfo = {"VAPOR", TI_PPRGM_TYPE, {0}};
+        library_t libinfo = {"VAPOR", TI_PPRGM_TYPE, date};
         lf=ti_Open(library_var, "w+");
         ti_Write(&libinfo, sizeof(library_t), 1, lf);
         ti_Close(lf);

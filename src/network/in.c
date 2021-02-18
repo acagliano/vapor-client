@@ -38,8 +38,16 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             break;
             
         case WELCOME:
+            dl_list=malloc(sizeof(dl_list_t));
+            strncpy(dl_list->name, "VAPOR", 8);
+            dl_list->type=TI_PPRGM_TYPE;
+            library_load_date(dl_list);
+            curr_total = 1;
+            curr_dl = 0;
             vapor_status=VAPOR_CONNECTED;
             queue_update=true;
+            
+            srvc_request_file(&dl_list[curr_dl]);
             break;
     
         case FETCH_SERVER_LIST:
