@@ -71,7 +71,8 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             }
             dl_list[curr_dl].size=packet->size;
             bytes_copied = 0;
-            srvc_show_dl_bar();
+            if(strncmp(dl_list[curr_dl].name, "VAPOR", 8))
+                srvc_show_dl_bar();
             break;
         }
         case FILE_WRITE_DATA:
@@ -117,7 +118,8 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
         case FILE_WRITE_SKIP:
             if(dl_list[curr_dl].status != DL_DONE)
                 dl_list[curr_dl].status = response;
-            srvc_show_dl_list();
+            if(strncmp(dl_list[curr_dl].name, "VAPOR", 8))
+                srvc_show_dl_list();
             curr_dl++;
             if(curr_dl < curr_total)
                 srvc_request_file(&dl_list[curr_dl]);

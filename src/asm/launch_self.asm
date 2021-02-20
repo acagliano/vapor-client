@@ -14,72 +14,69 @@ _DelMem        := $020590
 _asm_prgm_size := $D0118C
 _userMem       := $D1A881
 _EnoughMem     := $02051C
+_ChkFindSym    := $02050C
+_Mov9ToOp1     := $020320
 
 ;void update_program(void);
 _update_program:
-    ld sp,(__exitsp)
+    ld hl, (__exitsp)
+    push hl
     ld a,($E30018)
     cp a,$2D ;OS 16bpp
     call nz,_gfx_End
-    ld hl, $06
-    push hl
-    ld hl,mode_r
-    push hl
-    ld hl,program_name
-    push hl
-    call _ti_OpenVar
-    pop bc
-    pop bc
-    pop bc
-    or a,a
-    ret z
-    ld c,a
-    push bc
-    call _ti_GetDataPtr
-    inc hl
-    inc hl
-    ld (dataptr),hl
-    call _ti_GetSize
-    dec hl
-    dec hl
-    ld (datasize),hl
-    call _ti_Close
-    pop bc
     ld hl,jump_data
     ld de,jump_data_loc
     ld bc,jump_data_len
     push de
     ldir
     ret
-    
-jump_data_loc:=$E30800
+
 jump_data:
+jump_data_loc:=$E30800
+    push hl
+    scf
+    sbc hl,hl
+    ld (hl),2
+    pop hl
     or a,a
     sbc hl,hl
     ld de,(_asm_prgm_size)
     ld (_asm_prgm_size),hl
     ld hl,_userMem
     call _DelMem
-    ld hl,0
-datasize:=$-3
-    call _EnoughMem ;returns HL in DE
+    ld hl, jump_data_loc + program_name - jump_data
+    call _Mov9ToOp1
+    call _ChkFindSym        ; data in de
+    jr c, file_not_found
+    push de                 ; save de
+    ex de, hl
+    ld de, (hl)
+    ex.sis de, hl
+    call _EnoughMem         ;returns HL in DE
     ret c
-    ex hl,de
+    ex hl,de                ; size back in hl
     ld (_asm_prgm_size),hl
-    push hl
+    push hl                 ; we will likely need to preserve size
     ld de,_userMem
-    push de
     call _InsertMem
-    pop de
-    pop bc
-    push de
-    ld hl,0
-dataptr:=$-3
+    pop bc                  ; get size back
+    pop hl                  ; get data ptr back (src)
+    inc hl
+    inc hl                  ; pass size word
+    ld de, _userMem         ; get data ptr (dest)
     ldir
+    pop hl
+    ld hl, (hl)
+    ld sp, hl
+    ld hl, _userMem
+    push hl                 ; make ret return to usermem?
     ret
+file_not_found:
+    pop hl
+    ld hl, (hl)
+    ld sp, hl
+    ret
+program_name:
+    db $06,"VAPOR",0
 jump_data_len:=$-jump_data
 
-mode_r:
-    db "r",0
-program_name:
-    db "VAPOR",0
