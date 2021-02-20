@@ -30,6 +30,7 @@ _update_program:
 	call _ti_OpenVar
 	pop bc
 	pop bc
+    pop bc
 	or a,a
 	ret z
 	ld c,a

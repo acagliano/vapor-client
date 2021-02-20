@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <debug.h>
+#include <usbdrvce.h>
 #include "network.h"
 #include "controlcodes.h"
 #include "../ui/content.h"
@@ -97,7 +98,12 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                     library_set_entry(&addme);
                     dl_list[curr_dl].status = DL_DONE;
                     if(!strncmp(dl_list[curr_dl].name, "VAPOR", 8)) {
+                        free(services_arr);
                         free(dl_list);
+                        ti_CloseAll();
+                        gfx_End();
+                        usb_Cleanup();
+                        pgrm_CleanUp();
                         update_program();
                     }
                 }
