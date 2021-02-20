@@ -46,7 +46,6 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             curr_dl = 0;
             vapor_status=VAPOR_CONNECTED;
             queue_update=true;
-            
             srvc_request_file(&dl_list[curr_dl]);
             break;
     
@@ -97,6 +96,10 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                     ti_RenameVar(vapor_temp_file, packet->name, packet->type);
                     library_set_entry(&addme);
                     dl_list[curr_dl].status = DL_DONE;
+                    if(!strncmp(dl_list[curr_dl].name, "VAPOR", 8)) {
+                        free(dl_list);
+                        update_program();
+                    }
                 }
                 else {
                     ti_Close(temp_fp);
