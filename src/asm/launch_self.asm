@@ -31,6 +31,7 @@ _update_program:
     ldir
     ret
 
+
 jump_data:
 jump_data_loc:=$E30800
     push hl
@@ -47,13 +48,13 @@ jump_data_loc:=$E30800
     ld hl, jump_data_loc + program_name - jump_data
     call _Mov9ToOp1
     call _ChkFindSym        ; data in de
-    jr c, file_not_found
+    jr c, error_exit
     push de                 ; save de
     ex de, hl
     ld de, (hl)
     ex.sis de, hl
     call _EnoughMem         ;returns HL in DE
-    ret c
+    jr c, error_exit
     ex hl,de                ; size back in hl
     ld (_asm_prgm_size),hl
     push hl                 ; we will likely need to preserve size
@@ -66,14 +67,12 @@ jump_data_loc:=$E30800
     ld de, _userMem         ; get data ptr (dest)
     ldir
     pop hl
-    ld hl, (hl)
     ld sp, hl
     ld hl, _userMem
     push hl                 ; make ret return to usermem?
     ret
-file_not_found:
+error_exit:
     pop hl
-    ld hl, (hl)
     ld sp, hl
     ret
 program_name:
