@@ -66,15 +66,32 @@ jump_data_loc:=$E30800
     inc hl                  ; pass size word
     ld de, _userMem         ; get data ptr (dest)
     ldir
+jump_data_cleanup:
     pop hl
     ld sp, hl
-    ld hl, _userMem
-    push hl                 ; make ret return to usermem?
-    ret
+	pop	iy		; iy = flags
+	pop	af		; a = original flash wait states
+	ex	(sp),hl		; hl = flash wait state control port,
+				; save exit code
+	ld	(hl),a		; restore flash wait states
+	call	00004F0h	; _usb_ResetTimer
+	ld	iy,$d00080
+	set	1,(iy + $0d)	; use text buffer
+	res	3,(iy + $4a)	; use first shadow buffer
+	res	5,(iy + $4c)	; use shadow buffer
+	res	4,(iy+9)	; onInterrupt,(iy+onFlags)
+	set	0,(iy+3)	; graphDraw,(iy+graphFlags)
+	call	020808h		; _ClrLCDFull
+	call	020828h		; _HomeUp
+	call	021A3Ch		; _DrawStatusBar
+
+	pop	hl		; hl = exit code
+jump_data_smc_exit:
+	jp _userMem
 error_exit:
-    pop hl
-    ld sp, hl
-    ret
+	ld a,$C9
+	ld (jump_data_loc + jump_data_smc_exit - jump_data),a ;return instead of jumping to usermem after cleaning up stuff
+	jr jump_data_cleanup
 program_name:
     db $06,"VAPOR",0
 jump_data_len:=$-jump_data
