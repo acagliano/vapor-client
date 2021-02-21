@@ -92,19 +92,17 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 if(ti_GetSize(temp_fp) == dl_list[curr_dl].size){
                     library_t addme;
                     memcpy(&addme, packet, sizeof(library_t));
-                    ti_SetArchiveStatus(packet->archive, temp_fp);
+                    ti_SetArchiveStatus(true, temp_fp);
                     ti_Close(temp_fp);
                     ti_DeleteVar(packet->name, packet->type);
                     ti_RenameVar(vapor_temp_file, packet->name, packet->type);
                     library_set_entry(&addme);
                     dl_list[curr_dl].status = DL_DONE;
-                    if(!strncmp(dl_list[curr_dl].name, "VAPOR", 8)) {
+                    if((!strncmp(dl_list[curr_dl].name, "VAPOR", 8)) && (dl_list[curr_dl].type==TI_PPRGM_TYPE)) {
                         free(services_arr);
                         free(dl_list);
                         ti_CloseAll();
-                        gfx_End();
                         usb_Cleanup();
-                        pgrm_CleanUp();
                         update_program();
                     }
                 }

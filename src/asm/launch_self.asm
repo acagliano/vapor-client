@@ -6,6 +6,7 @@ extern _ti_GetDataPtr
 extern _ti_GetSize
 extern _gfx_End
 extern __exitsp
+extern __exit
 
 public _update_program
 
@@ -24,35 +25,51 @@ _update_program:
     ld a,($E30018)
     cp a,$2D ;OS 16bpp
     call nz,_gfx_End
+
+	ld c,6 ;pprgm type
+	ld de,mode_read ;open for reading
+    ld hl, program_name ;open the program
+    push bc,de,hl
+	call _ti_OpenVar
+	pop bc,bc,bc
+	scf
+	sbc hl,hl
+	or a,a
+	jq z,__exit ;use the C exit label that we haven't destroyed yet
+	ld c,a
+	push bc
+	call _ti_GetDataPtr
+	inc hl ;skip header bytes
+	inc hl
+	ld (new_program_ptr),hl
+	call _ti_GetSize
+	dec hl ;len-2 to account for header being skipped
+	dec hl
+	ld (new_program_len),hl
+	call _ti_Close
+	pop bc
     ld hl,jump_data
     ld de,jump_data_loc
     ld bc,jump_data_len
     push de
     ldir
     ret
-
+mode_read:
+	db "r",0
 
 jump_data:
 jump_data_loc:=$E30800
-    push hl
-    scf
-    sbc hl,hl
-    ld (hl),2
-    pop hl
+	ld sp,(__exitsp) ;doing this before clobbering usermem
+	ld a,2
+	ld ($FFFFFF),a ;this saves two bytes because we don't need to push/pop hl
     or a,a
     sbc hl,hl
     ld de,(_asm_prgm_size)
     ld (_asm_prgm_size),hl
     ld hl,_userMem
     call _DelMem
-    ld hl, jump_data_loc + program_name - jump_data
-    call _Mov9ToOp1
-    call _ChkFindSym        ; data in de
-    jr c, error_exit
-    push de                 ; save de
-    ex de, hl
-    ld de, (hl)
-    ex.sis de, hl
+	ld hl,0
+new_program_len:=$-3
     call _EnoughMem         ;returns HL in DE
     jr c, error_exit
     ex hl,de                ; size back in hl
@@ -61,14 +78,11 @@ jump_data_loc:=$E30800
     ld de,_userMem
     call _InsertMem
     pop bc                  ; get size back
-    pop hl                  ; get data ptr back (src)
-    inc hl
-    inc hl                  ; pass size word
+	ld hl,0
+new_program_ptr:=$-3
     ld de, _userMem         ; get data ptr (dest)
     ldir
-jump_data_cleanup:
-    pop hl
-    ld sp, hl
+jump_data_cleanup: ;do the same thing the toolchain does
 	pop	iy		; iy = flags
 	pop	af		; a = original flash wait states
 	ex	(sp),hl		; hl = flash wait state control port,
@@ -93,6 +107,6 @@ error_exit:
 	ld (jump_data_loc + jump_data_smc_exit - jump_data),a ;return instead of jumping to usermem after cleaning up stuff
 	jr jump_data_cleanup
 program_name:
-    db $06,"VAPOR",0
+    db "VAPOR",0
 jump_data_len:=$-jump_data
 
