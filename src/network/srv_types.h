@@ -56,9 +56,16 @@ typedef struct dl_list {
     char name[9];
     uint8_t type;
     size_t size;
-    date_t date;
+    uint8_t sha1[20];
     uint8_t status;
 } dl_list_t;
+
+typedef struct _metadata {
+    char name[9];
+    uint8_t type;
+    uint8_t sha1[20];
+} file_metadata_t;
+
 extern dl_list_t *dl_list;
 extern uint8_t curr_dl;
 extern uint8_t curr_total;

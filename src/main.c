@@ -27,6 +27,7 @@
 
 // Game Data Types (Structure Definitions)
 #include "ui/content.h"
+#include "ui/library.h"
 #include "flags.h"
 #include "network/controlcodes.h"
 #include "network/network.h"

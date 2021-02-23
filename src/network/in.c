@@ -2,13 +2,14 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
-#include <debug.h>
+#include <fileioc.h>
 #include <usbdrvce.h>
+#include <hashlib.h>
 #include "network.h"
 #include "controlcodes.h"
 #include "../ui/content.h"
+#include "../ui/library.h"
 #include "srv_types.h"
-#include "../fileaccess.h"
 #include "../asm/functions.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -17,9 +18,6 @@ const char* vapor_temp_file = "VTMP5100";
 srv_list_t* services_arr=NULL;
 uint24_t services_arr_block_size=0;
 ti_var_t temp_fp = 0;
-bool file_init_error=false;
-bool file_install_error=false;
-file_start_t file_data;
 uint8_t curr_dl = 0;
 uint8_t curr_total = 0;
 dl_list_t *dl_list = NULL;
@@ -42,7 +40,6 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             dl_list=malloc(sizeof(dl_list_t));
             strncpy(dl_list->name, "VAPOR", 8);
             dl_list->type=TI_PPRGM_TYPE;
-            library_load_date(dl_list);
             curr_total = 1;
             curr_dl = 0;
             vapor_status=VAPOR_CONNECTED;
@@ -83,13 +80,16 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             break;
         case FILE_WRITE_END:
         {
-            file_start_t *packet = (void*)data;
+            file_metadata_t *packet = (void*)data;
             if(temp_fp){
+                uint8_t sha1[20];
                 srvc_show_dl_bar();
                 ti_Rewind(temp_fp);
                 dl_list[curr_dl].status = DL_VERIFY;
                 srvc_show_dl_list();
-                if(ti_GetSize(temp_fp) == dl_list[curr_dl].size){
+                hashlib_SHA1(ti_GetDataPtr(temp_fp), ti_GetSize(temp_fp), sha1);
+                if( (ti_GetSize(temp_fp) == dl_list[curr_dl].size) &&
+                    (!memcmp(sha1, packet->sha1, 20))){
                     library_t addme;
                     memcpy(&addme, packet, sizeof(library_t));
                     ti_SetArchiveStatus(true, temp_fp);

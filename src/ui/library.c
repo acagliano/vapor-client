@@ -1,7 +1,8 @@
 #include <string.h>
 #include <stdbool.h>
-#include "../fileaccess.h"
+#include <fileioc.h>
 #include "content.h"
+#include "library.h"
 #include "../network/srv_types.h"
 
 const char library_var[]="VPRLibr";
@@ -25,11 +26,7 @@ void ui_ShowLibrary(bool show_upd){
         if(libinfo.type==TI_APPVAR_TYPE) gfx_PrintStringXY("appv", 150, i*10+y);
         else gfx_PrintStringXY("prgm", 150, i*10+y);
         gfx_SetTextXY(225, i*10+y);
-        gfx_PrintUInt(libinfo.date.year, 4);
-        gfx_PrintString("-");
-        gfx_PrintUInt(libinfo.date.month, 2);
-        gfx_PrintString("-");
-        gfx_PrintUInt(libinfo.date.day, 2);
+        // display SHA-1 somehow?
     }
     ti_Close(libfile);
     gfx_SetTextFGColor(color);
@@ -72,18 +69,16 @@ void lib_Init(void){
         date_t date={2021, 2, 18};
         ti_var_t tf=ti_OpenVar("VAPOR", "r", TI_PPRGM_TYPE);
         ti_Close(tf);
-        library_t libinfo = {"VAPOR", TI_PPRGM_TYPE, date};
+        library_t libinfo = {"VAPOR", TI_PPRGM_TYPE, {0}};
         lf=ti_Open(library_var, "w+");
         ti_Write(&libinfo, sizeof(library_t), 1, lf);
         ti_Close(lf);
     }
 }
 
-void library_load_date(dl_list_t* dl){
-    ti_var_t tf = ti_OpenVar(dl->name, "r", dl->type);
-    library_t* lib;
-    if(!tf) return;
-    ti_Close(tf);
-    lib = library_get_entry(dl->name, dl->type);
-    if(lib) memcpy(&dl->date, &lib->date, sizeof(date_t));
+
+void library_load_sha1(uint8_t* sha1_out, const char* name, uint8_t type){
+    library_t *entry = library_get_entry(name, type);
+    if(entry==NULL) return;
+    memcpy(sha1_out, entry->sha1, 20);
 }

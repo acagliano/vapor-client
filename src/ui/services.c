@@ -2,10 +2,12 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <tice.h>
+#include <string.h>
 #include "content.h"
 #include "../network/controlcodes.h"
 #include "../network/network.h"
 #include "../network/srv_types.h"
+#include "library.h"
 
 
 void ui_RenderServicesContent(void){
@@ -33,8 +35,11 @@ void ui_RenderServicesContent(void){
 
 
 void srvc_request_file(dl_list_t* dl){
-    library_load_date(dl);
-    ntwk_send(FILE_WRITE_START, PS_PTR(dl, sizeof(dl_list_t)));
+    file_metadata_t md = {0};
+    strncpy(md.name, dl->name, 8);
+    md.type=dl->type;
+    library_load_sha1(&md.sha1, dl->name, dl->type);
+    ntwk_send(FILE_WRITE_START, PS_PTR(&md, sizeof(file_metadata_t)));
 }
 
 void srvc_show_dl_list(void){
