@@ -50,7 +50,7 @@ _run_program:
 	scf
 	sbc hl,hl
 	or a,a
-	jq z,__exitthis ;use the C exit label that we haven't destroyed yet
+	jq z,__exit ;use the C exit label that we haven't destroyed yet
 	ld c,a
 	push bc
 	call _ti_GetDataPtr
@@ -180,7 +180,6 @@ __in_ram:
 	dec bc
 	ld de,_userMem
 	ldir
-__exitthis:
 	pop hl
 	ld sp,hl
 	jp _userMem
