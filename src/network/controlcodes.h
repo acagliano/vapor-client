@@ -11,6 +11,7 @@ enum ControlCodes {
     FETCH_SOFTWARE_INFO,
     
     SRVC_GET_REQ = 0x20,
+    SRVC_RUN_FILE = 0x21,
     
     FILE_WRITE_START = 0x40,
     FILE_WRITE_DATA,
@@ -24,6 +25,7 @@ enum ControlCodes {
     
     // DEBUG: 0xf*
     WELCOME = 0xd0,
+    CLIENT_READY = 0xd1,
     MESSAGE = 0xf0,
     BRIDGE_ERROR = 0xf1,
     SERVER_SUCCESS = 0xf3,

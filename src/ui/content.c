@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include "content.h"
 #include "library.h"
+#include "services.h"
 #include "../gfx/graphics.h"
 #include "../network/srv_types.h"
 #include "../asm/functions.h"

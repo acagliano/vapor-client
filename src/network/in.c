@@ -9,6 +9,7 @@
 #include "controlcodes.h"
 #include "../ui/content.h"
 #include "../ui/library.h"
+#include "../ui/services.h"
 #include "srv_types.h"
 #include "../asm/functions.h"
 
@@ -23,6 +24,7 @@ uint8_t curr_total = 0;
 dl_list_t *dl_list = NULL;
 size_t dl_size = 0;
 size_t bytes_copied = 0;
+sha1_ctx ctx;
 
 void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
     size_t data_size = buff_size-1;
@@ -43,7 +45,6 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             curr_total = 1;
             curr_dl = 0;
             vapor_status=VAPOR_CONNECTED;
-            queue_update=true;
             srvc_request_file(&dl_list[curr_dl]);
             break;
     
@@ -52,6 +53,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 services_arr_block_size = data_size;
                 services_arr = realloc(services_arr, services_arr_block_size);
             }
+            services_loaded = true;
             service_count = data_size / sizeof(srv_list_t);
             memcpy(services_arr, data, data_size);
             queue_update=true;
@@ -66,16 +68,22 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 dl_list[curr_dl].status = DL_IO_ERR;
                 break;
             }
+            hashlib_sha1init(&ctx);
             dl_list[curr_dl].size=packet->size;
             bytes_copied = 0;
-            if(strncmp(dl_list[curr_dl].name, "VAPOR", 8))
+            if(strncmp(dl_list[curr_dl].name, "VAPOR", 8)){
+                srvc_show_dl_list();
                 srvc_show_dl_bar();
+            }
             break;
         }
         case FILE_WRITE_DATA:
             if(!temp_fp) break;
+            dl_list[curr_dl].status = DL_DOWNLOADING;
             ti_Write(data, data_size, 1, temp_fp);
             bytes_copied += data_size;
+            hashlib_sha1update(&ctx, data, data_size);
+            srvc_show_dl_list();
             srvc_show_dl_bar();
             break;
         case FILE_WRITE_END:
@@ -87,8 +95,8 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 ti_Rewind(temp_fp);
                 dl_list[curr_dl].status = DL_VERIFY;
                 srvc_show_dl_list();
-                hashlib_SHA1(ti_GetDataPtr(temp_fp), ti_GetSize(temp_fp), sha1);
-                if( (ti_GetSize(temp_fp) == dl_list[curr_dl].size) &&
+                hashlib_sha1final(&ctx, sha1);
+                if( (ti_GetSize(temp_fp) == dl_list[curr_dl].size)  &&
                     (!memcmp(sha1, packet->sha1, 20))){
                     library_t addme;
                     memcpy(&addme, packet, sizeof(library_t));
@@ -105,6 +113,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                         usb_Cleanup();
                         update_program();
                     }
+                    else strncpy(main_file, packet->name, 8);
                 }
                 else {
                     ti_Close(temp_fp);
@@ -138,9 +147,16 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 srvc_show_dl_list();
                 break;
             }
-        case SERVER_SUCCESS:
-            ui_SuccessWindow("==SERVER ACTION==", data)
-            break;
+            
+        case SRVC_RUN_FILE:
+            {
+                struct {
+                    uint8_t name[9];
+                    uint8_t type;
+                } *packet = (void*)data;
+                run_program(packet->name, packet->type);
+                break;
+            }
     }
 }
 

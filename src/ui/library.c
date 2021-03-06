@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <fileioc.h>
+#include <hashlib.h>
 #include "content.h"
 #include "library.h"
 #include "../network/srv_types.h"
@@ -22,10 +23,13 @@ void ui_ShowLibrary(bool show_upd){
         return;
     }
     for(i=0; ti_Read(&libinfo, sizeof(library_t), 1, libfile); i++){
-        gfx_PrintStringXY(libinfo.name, 80, i*10+y);
-        if(libinfo.type==TI_APPVAR_TYPE) gfx_PrintStringXY("appv", 150, i*10+y);
-        else gfx_PrintStringXY("prgm", 150, i*10+y);
-        gfx_SetTextXY(225, i*10+y);
+        uint8_t prior_color = gfx_SetTextFGColor(0);
+        gfx_FillRectangleColor(80, i*10+y-1, 50, 9, 239);
+        if(libinfo.type==TI_APPVAR_TYPE) gfx_PrintStringXY("appv", 87, i*10+y-1);
+        else if(libinfo.type==TI_PRGM_TYPE) gfx_PrintStringXY("prgm", 87, i*10+y-1);
+        else if(libinfo.type==TI_PPRGM_TYPE) gfx_PrintStringXY("pprgm", 84, i*10+y-1);
+        gfx_SetTextFGColor(prior_color);
+        gfx_PrintStringXY(libinfo.name, 140, i*10+y);
         // display SHA-1 somehow?
     }
     ti_Close(libfile);
@@ -66,10 +70,10 @@ void lib_Init(void){
     ti_var_t lf=ti_Open(library_var, "r+");
     if(lf){ ti_Close(lf); return; }
     else {
-        date_t date={2021, 2, 18};
-        ti_var_t tf=ti_OpenVar("VAPOR", "r", TI_PPRGM_TYPE);
-        ti_Close(tf);
         library_t libinfo = {"VAPOR", TI_PPRGM_TYPE, {0}};
+        ti_var_t tf=ti_OpenVar("VAPOR", "r", TI_PPRGM_TYPE);
+        hashlib_SHA1(ti_GetDataPtr(tf), ti_GetSize(tf), libinfo.sha1);
+        ti_Close(tf);
         lf=ti_Open(library_var, "w+");
         ti_Write(&libinfo, sizeof(library_t), 1, lf);
         ti_Close(lf);
@@ -81,4 +85,12 @@ void library_load_sha1(uint8_t* sha1_out, const char* name, uint8_t type){
     library_t *entry = library_get_entry(name, type);
     if(entry==NULL) return;
     memcpy(sha1_out, entry->sha1, 20);
+}
+
+void library_move_to_archive(void) {
+    ti_var_t f = ti_Open(library_var, "r");
+    if(f){
+        ti_SetArchiveStatus(true, f);
+        ti_Close(f);
+    }
 }

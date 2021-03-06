@@ -27,6 +27,7 @@
 
 // Game Data Types (Structure Definitions)
 #include "ui/content.h"
+#include "ui/services.h"
 #include "ui/library.h"
 #include "flags.h"
 #include "network/controlcodes.h"
@@ -95,8 +96,9 @@ int main(void) {
                 gfx_FillCircleColor(90, 10*service_selected+13, 3, BG_COLOR );
                 service_selected-=(service_selected>0);
             }
-            if(key==sk_Trace){
+            if((key==sk_Trace || (!services_loaded)) && (vapor_status==VAPOR_CONNECTED)){
                 ntwk_send_nodata(FETCH_SERVER_LIST);
+                services_loaded = true;
             }
             if(key==sk_Graph){
                 ntwk_send(SRVC_GET_REQ, PS_STR(services_arr[service_selected].name));
@@ -118,6 +120,7 @@ int main(void) {
         if(queue_update) {ui_RenderContent(); queue_update=false;}
     } while(1);
     //cache_purge();
+    library_move_to_archive();
     ti_CloseAll();
     free(services_arr);
     gfx_End();

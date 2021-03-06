@@ -2,6 +2,9 @@
 #ifndef library_h
 #define library_h
 
+#include <stdint.h>
+#include <stdbool.h>
+
 typedef struct _library {
     char name[9];
     uint8_t type;
@@ -12,5 +15,6 @@ void ui_ShowLibrary(bool show_upd);
 void lib_Init(void);
 bool library_set_entry(library_t* libr);
 void library_load_sha1(uint8_t* sha1_out, const char* name, uint8_t type);
+void library_move_to_archive(void);
 
 #endif
