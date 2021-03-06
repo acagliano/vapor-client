@@ -52,9 +52,11 @@ void ui_RenderNavBar(void){
         ui_button_indic(menu_text[i], 0, 0, (i-1)*20+50, 76, 20, true, (menu_item_selected==i));
     ui_button_indic("  Connect", 0, 0, 240-20, 95, 20, false, false);
     ui_render_vapor_status();
-    ui_button_indic(NULL, 30, 96, 240-20, 32, 20, true, false);
-    ui_button_indic(NULL, 31, 128, 240-20, 32, 20, true, false);
-    ui_button_indic(nav_opts_btm[(menu_item_selected-1)*2], 0, 160, 240-20, 80, 20, true, false);
-    ui_button_indic(nav_opts_btm[(menu_item_selected-1)*2+1], 0, 240, 240-20, 80, 20, true, false);
+    if(menu_item_selected>0){
+        ui_button_indic(NULL, 30, 96, 240-20, 32, 20, true, false);
+        ui_button_indic(NULL, 31, 128, 240-20, 32, 20, true, false);
+        ui_button_indic(nav_opts_btm[(menu_item_selected-1)*2], 0, 160, 240-20, 80, 20, true, false);
+        ui_button_indic(nav_opts_btm[(menu_item_selected-1)*2+1], 0, 240, 240-20, 80, 20, true, false);
+    }
     gfx_SetTextFGColor(color);
 }

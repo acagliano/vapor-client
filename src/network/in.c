@@ -113,7 +113,6 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                         usb_Cleanup();
                         update_program();
                     }
-                    else strncpy(main_file, packet->name, 8);
                 }
                 else {
                     ti_Close(temp_fp);
