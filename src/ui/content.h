@@ -52,19 +52,13 @@ enum _menu_items {
 void ui_RenderBackground(void);
 void ui_RenderContent(void);
 void ui_RenderNavBar(void);
-void ui_RenderServicesContent(void);
 void ui_ContentWindow(const char* error_t, const char* error_m, uint8_t border_color);
 #define ui_ErrorWindow(title, msg)      ui_ContentWindow((title), (msg), (224));
-#define ui_SuccessWindow(title, msg)    ui_ContentWindow((title), (msg), (36));
 
 uint8_t num_len(uint24_t num);
 uint8_t text_WrappedString(const char *str, uint24_t left_margin, uint8_t top_margin, uint24_t right_margin);
 uint24_t text_CenterText(const char *string, const char c, uint24_t x, uint24_t w);
 void gfx_PrintStringCentered(const char* string, uint24_t x, uint8_t y, uint24_t w);
 
-
-void srvc_show_dl_list(void);
-void srvc_request_file(dl_list_t* dl);
-void srvc_show_dl_bar(void);
 
 #endif
