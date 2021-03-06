@@ -11,16 +11,19 @@ extern __exit
 
 public _run_program
 
+_LoadDEInd_s   := $021D9C
 _InsertMem     := $020514
 _DelMem        := $020590
-_asm_prgm_size := $D0118C
-_userMem       := $D1A881
 _EnoughMem     := $02051C
 _ChkFindSym    := $02050C
 _Mov9ToOp1     := $020320
 _ChkInRam      := $021F98
 _Mov8b         := $020304
+
+_asm_prgm_size := $D0118C
+_userMem       := $D1A881
 _OP1           := $D005F8
+_tiflags       := $D00080
 
 ;void run_program(const char *name, uint8_t type);
 _run_program:
@@ -140,19 +143,19 @@ jump_data_len:=$-jump_data
 program_name_temp_loc := jump_data_loc + jump_data_len
 
 stub_code:
-	ld iy,ti.flags
-	ld hl,ti.userMem
-	ld de,(ti.asm_prgm_size)
-	call ti.DelMem
+	ld iy,_tiflags
+	ld hl,_userMem
+	ld de,(_asm_prgm_size)
+	call _DelMem
 	pop hl
-	call ti.Mov9ToOP1
-	call ti.ChkFindSym
+	call _Mov9ToOP1
+	call _ChkFindSym
 	jr nc,__next
 	pop hl
 	ld sp,hl
 	ret
 __next:
-	call ti.ChkInRam
+	call _ChkInRam
 	ex de,hl
 	jr z,__in_ram
 	ld de,9
@@ -161,13 +164,13 @@ __next:
 	add	hl,de
 	inc	hl
 __in_ram:
-	call ti.LoadDEInd_s
-	ld (ti.asm_prgm_size),de
+	call _LoadDEInd_s
+	ld (_asm_prgm_size),de
 	push hl
 	push de
 	ex hl,de
-	ld de,ti.userMem
-	call ti.InsertMem
+	ld de,_userMem
+	call _InsertMem
 	pop bc
 	pop hl
 	xor a,a
@@ -175,12 +178,12 @@ __in_ram:
 	inc hl   ;$7B
 	dec bc
 	dec bc
-	ld de,ti.userMem
+	ld de,_userMem
 	ldir
 __exit:
 	pop hl
 	ld sp,hl
-	jp ti.userMem
+	jp _userMem
 stub_code_len:=$-stub_code
 
 
