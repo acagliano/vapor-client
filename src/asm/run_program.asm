@@ -148,7 +148,7 @@ stub_code:
 	ld de,(_asm_prgm_size)
 	call _DelMem
 	pop hl
-	call _Mov9ToOP1
+	call _Mov9ToOp1
 	call _ChkFindSym
 	jr nc,__next
 	pop hl
