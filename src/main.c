@@ -37,6 +37,7 @@
 
 // USB Libraries
 #include <usbdrvce.h>
+#include <srldrvce.h>
 
 #define DEBUG
 #undef NDEBUG
