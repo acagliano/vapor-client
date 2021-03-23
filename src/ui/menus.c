@@ -10,7 +10,8 @@ uint8_t menu_item_selected=MENU_NULL;
 char menu_text[][10]={
     " ",
     "LIBRARY",
-    "SERVICES"
+    "SERVICES",
+    "SETTINGS"
 };
 
 char nav_bar_text[][10]={
@@ -23,7 +24,9 @@ char nav_opts_btm[][10]={
     "Pkg Upd",
     "Plchld",
     "Srv List",
-    "Srv Join"
+    "Srv Join",
+    "Toggle",
+    "Help"
 };
 
 
@@ -48,7 +51,7 @@ void ui_render_vapor_status(void){
 void ui_RenderNavBar(void){
     uint8_t i, color=gfx_SetTextFGColor(0);
     gfx_RLETSprite(main_icon, 12, 0);
-    for(i=1; i<3; i++)
+    for(i=1; i<4; i++)
         ui_button_indic(menu_text[i], 0, 0, (i-1)*20+50, 76, 20, true, (menu_item_selected==i));
     ui_button_indic("  Connect", 0, 0, 240-20, 95, 20, false, false);
     ui_render_vapor_status();

@@ -13,10 +13,14 @@ enum ControlCodes {
     SRVC_GET_REQ = 0x20,
     SRVC_RUN_FILE = 0x21,
     
+    PRGM_SELF_UPDATE = 0x30,
+    PRGM_LIBS_UPDATE,
+    
     FILE_WRITE_START = 0x40,
     FILE_WRITE_DATA,
     FILE_WRITE_END,
     FILE_WRITE_SKIP,
+    FILE_WRITE_NEXT,
     FILE_CHECK_UP_TO_DATE,
     
     LIBRARY_CHECK_CRC = 0x50,
@@ -28,6 +32,7 @@ enum ControlCodes {
     CLIENT_READY = 0xd1,
     MESSAGE = 0xf0,
     BRIDGE_ERROR = 0xf1,
+    SERVER_ERROR = 0xf2,
     SERVER_SUCCESS = 0xf3,
     PING = 0xfc,
 };
@@ -40,10 +45,10 @@ enum _player_status {
 };
 
 enum _error_codes {
-    SUCCESS,
-    NO_GAME_FOUND,
-    GAME_IN_PROGRESS,
-    PLAYER_LIMIT
+    SERVER_IO_ERROR,
+    SERVER_FNF_ERROR,
+    INVALID_PACKET_TYPE = 0xfe,
+    SERVER_MISC_EXC = 0xff
 };
 
 

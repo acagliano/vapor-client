@@ -22,7 +22,7 @@ EXTRA_CFLAGS ?= -Wall -Wextra
 # Debug Options
 # ----------------------------
 
-OUTPUT_MAP   ?= NO
+OUTPUT_MAP   ?= YES
 
 include $(CEDEV)/meta/makefile.mk
 

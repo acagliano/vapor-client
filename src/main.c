@@ -29,6 +29,7 @@
 #include "ui/content.h"
 #include "ui/services.h"
 #include "ui/library.h"
+#include "ui/settings.h"
 #include "flags.h"
 #include "network/controlcodes.h"
 #include "network/network.h"
@@ -38,10 +39,6 @@
 // USB Libraries
 #include <usbdrvce.h>
 #include <srldrvce.h>
-
-#define DEBUG
-#undef NDEBUG
-#include <debug.h>
 
 net_flags_t netflags = {0};
 uint24_t service_selected=0;
@@ -87,7 +84,7 @@ int main(void) {
             queue_update=true;
         }
         if(key==sk_Up) {menu_item_selected-=(menu_item_selected>1);}
-        if(key==sk_Down) {menu_item_selected+=(menu_item_selected<MENU_SERVICES);}
+        if(key==sk_Down) {menu_item_selected+=(menu_item_selected<MENU_SETTINGS);}
         if(menu_item_selected==MENU_SERVICES){
             if(key==sk_Zoom){
                 gfx_FillCircleColor(90, 10*service_selected+13, 3, BG_COLOR );
@@ -103,6 +100,30 @@ int main(void) {
             }
             if(key==sk_Graph){
                 ntwk_send(SRVC_GET_REQ, PS_STR(services_arr[service_selected].name));
+            }
+        }
+        if(menu_item_selected==MENU_SETTINGS){
+            if(key==sk_Zoom) setting_selected += (setting_selected<8);
+            if(key==sk_Window) setting_selected -= (setting_selected>0);
+            if(key==sk_Trace) {
+                if(setting_selected<6)
+                    settings.flags[setting_selected] = (!settings.flags[setting_selected]);
+                else if(setting_selected==8){
+                    settings.security_level++;
+                    if(settings.security_level>HIGH) settings.security_level=0;
+                }
+                else
+                    strncpy(settings.login_tokens[setting_selected-7], "test", 5);
+                
+            }
+            if(key==sk_Graph){
+                settings_HelpUI(setting_selected);
+            }
+            if(key){
+                if((setting_selected<6) || setting_selected==8)
+                    strncpy(nav_opts_btm[4], "Toggle", 7);
+                else
+                    strncpy(nav_opts_btm[4], "Edit", 5);
             }
         }
         if(key==sk_Clear){

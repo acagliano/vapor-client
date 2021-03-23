@@ -7,6 +7,7 @@ extern "C" {
 
 #include "main_icon.h"
 #include "vapor_indic.h"
+#include "encrypted.h"
 
 #ifdef __cplusplus
 }

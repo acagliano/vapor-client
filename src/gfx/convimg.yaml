@@ -8,6 +8,7 @@ converts:
       images:
         - main_icon
         - vapor_indic
+        - encrypted
 
 outputs:
     - type: c

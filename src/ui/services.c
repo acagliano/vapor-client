@@ -66,7 +66,6 @@ void srvc_show_dl_list(void){
         else if(status == DL_DOWNLOADING) gfx_PrintStringXY("downloading...", 140, y);
     }
     gfx_SetTextFGColor(color);
-    gfx_BlitRectangle(gfx_buffer, 60, y_init-12, 200, h);
     for(i=0; i<100; i++) boot_WaitShort();
     
 }
@@ -78,6 +77,5 @@ void srvc_show_dl_bar(void){
     uint24_t barw = bytes_copied * 68 / dl_list[curr_dl].size;
     gfx_RectangleColor(138, y, 70, 8, 0);
     gfx_FillRectangleColor(139, y+1, 68, 6, 231);
-    gfx_FillRectangleColor(139, y, barw, 8, 228);
-    gfx_BlitRectangle(gfx_buffer, 138, y, 70, 10);
+    gfx_FillRectangleColor(139, y+1, barw, 6, 228);
 }

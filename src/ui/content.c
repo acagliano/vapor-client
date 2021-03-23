@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include "content.h"
 #include "library.h"
+#include "settings.h"
 #include "services.h"
 #include "../gfx/graphics.h"
 #include "../network/srv_types.h"
@@ -31,6 +32,9 @@ void ui_RenderContent(void){
             break;
         case MENU_LIBRARY:
             ui_ShowLibrary(false);
+            break;
+        case MENU_SETTINGS:
+            ui_ShowSettings();
             break;
     }
     gfx_BlitBuffer();

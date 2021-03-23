@@ -38,12 +38,14 @@
 #define OFFLINE_COLOR 224
 
 extern bool queue_update;
+extern char nav_opts_btm[][10];
 
 extern uint8_t menu_item_selected;
 enum _menu_items {
     MENU_NULL,
     MENU_LIBRARY,
-    MENU_SERVICES
+    MENU_SERVICES,
+    MENU_SETTINGS
 };
 
 

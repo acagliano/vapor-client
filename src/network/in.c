@@ -10,8 +10,11 @@
 #include "../ui/content.h"
 #include "../ui/library.h"
 #include "../ui/services.h"
+#include "../ui/settings.h"
 #include "srv_types.h"
 #include "../asm/functions.h"
+#undef NDEBUG
+#include <debug.h>
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
@@ -39,13 +42,16 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             break;
             
         case WELCOME:
-            dl_list=malloc(sizeof(dl_list_t));
-            strncpy(dl_list->name, "VAPOR", 8);
-            dl_list->type=TI_PPRGM_TYPE;
-            curr_total = 1;
-            curr_dl = 0;
             vapor_status=VAPOR_CONNECTED;
-            srvc_request_file(&dl_list[curr_dl]);
+            queue_update=true;
+            if(settings.flags[UPD_SELF]){
+                dl_list=malloc(sizeof(dl_list_t));
+                strncpy(dl_list->name, "VAPOR", 8);
+                dl_list->type=TI_PPRGM_TYPE;
+                curr_total = 1;
+                curr_dl = 0;
+                srvc_request_file(&dl_list[curr_dl]);
+            }
             break;
     
         case FETCH_SERVER_LIST:
@@ -62,13 +68,14 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
         {
             struct {
                 uint24_t size;
+                uint8_t type;
             } *packet = (void*)data;
-            temp_fp=ti_OpenVar(vapor_temp_file, "w", dl_list[curr_dl].type);
+            temp_fp=ti_OpenVar(vapor_temp_file, "w", packet->type);
             if(!temp_fp) {
                 dl_list[curr_dl].status = DL_IO_ERR;
                 break;
             }
-            hashlib_sha1init(&ctx);
+            if(settings.flags[HASH_FILES]) hashlib_sha1init(&ctx);
             dl_list[curr_dl].size=packet->size;
             bytes_copied = 0;
             if(strncmp(dl_list[curr_dl].name, "VAPOR", 8)){
@@ -79,36 +86,49 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
         }
         case FILE_WRITE_DATA:
             if(!temp_fp) break;
+            {
+            uint8_t h = 10 * curr_total + 20;
             dl_list[curr_dl].status = DL_DOWNLOADING;
             ti_Write(data, data_size, 1, temp_fp);
             bytes_copied += data_size;
-            hashlib_sha1update(&ctx, data, data_size);
+            if(settings.flags[HASH_FILES]) hashlib_sha1update(&ctx, data, data_size);
             srvc_show_dl_list();
             srvc_show_dl_bar();
+            gfx_BlitRectangle(gfx_buffer, 60, 120 - (h / 2) - 12, 200, h);
+            ntwk_send_nodata(FILE_WRITE_NEXT);
             break;
+            }
         case FILE_WRITE_END:
         {
             file_metadata_t *packet = (void*)data;
             if(temp_fp){
+                bool file_error = false;
                 uint8_t sha1[20];
                 srvc_show_dl_bar();
                 ti_Rewind(temp_fp);
-                dl_list[curr_dl].status = DL_VERIFY;
-                srvc_show_dl_list();
-                hashlib_sha1final(&ctx, sha1);
-                if( (ti_GetSize(temp_fp) == dl_list[curr_dl].size)  &&
-                    (!memcmp(sha1, packet->sha1, 20))){
+                
+                if(settings.flags[HASH_FILES]) {
+                    dl_list[curr_dl].status = DL_VERIFY;
+                    srvc_show_dl_list();
+                    hashlib_sha1final(&ctx, sha1);
+                    if(memcmp(sha1, packet->sha1, 20)){
+                        file_error = true;
+                    }
+                }
+                
+                if(ti_GetSize(temp_fp) != dl_list[curr_dl].size)
+                    file_error = true;
+                
+                if(!file_error){
                     library_t addme;
                     memcpy(&addme, packet, sizeof(library_t));
+                    library_set_entry(&addme);
+                    ti_DeleteVar(packet->name, packet->type);
                     ti_SetArchiveStatus(true, temp_fp);
                     ti_Close(temp_fp);
-                    ti_DeleteVar(packet->name, packet->type);
                     ti_RenameVar(vapor_temp_file, packet->name, packet->type);
-                    library_set_entry(&addme);
                     dl_list[curr_dl].status = DL_DONE;
                     if((!strncmp(dl_list[curr_dl].name, "VAPOR", 8)) && (dl_list[curr_dl].type==TI_PPRGM_TYPE)) {
-                        free(services_arr);
-                        free(dl_list);
                         ti_CloseAll();
                         usb_Cleanup();
                         update_program();
