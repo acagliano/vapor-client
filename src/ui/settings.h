@@ -33,8 +33,8 @@ typedef struct _settings {
     union {
         struct {
             bool flags[6];
-            char login_tokens[2][STR_WIDTHS];
-            uint8_t security_level;
+            uint24_t rsa_bit_width;
+            bool enable_login;
         };
         struct {
             bool autoupd_self;
@@ -42,10 +42,8 @@ typedef struct _settings {
             bool autoupd_noncanonical;
             bool reload_after_upd;
             bool hash_files;
-            bool enable_vapor_login;
-            char username[STR_WIDTHS];
-            char password[STR_WIDTHS];
-            uint8_t rsa_depth;
+            bool enable_vapor_token;
+            uint24_t rsa_depth;
         };
     };
 } settings_t;

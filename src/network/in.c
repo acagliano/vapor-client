@@ -75,7 +75,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 dl_list[curr_dl].status = DL_IO_ERR;
                 break;
             }
-            if(settings.flags[HASH_FILES]) hashlib_sha1init(&ctx);
+            if(settings.flags[HASH_FILES]) hashlib_Sha1Init(&ctx);
             dl_list[curr_dl].size=packet->size;
             bytes_copied = 0;
             if(strncmp(dl_list[curr_dl].name, "VAPOR", 8)){
@@ -91,7 +91,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
             dl_list[curr_dl].status = DL_DOWNLOADING;
             ti_Write(data, data_size, 1, temp_fp);
             bytes_copied += data_size;
-            if(settings.flags[HASH_FILES]) hashlib_sha1update(&ctx, data, data_size);
+            if(settings.flags[HASH_FILES]) hashlib_Sha1Update(&ctx, data, data_size);
             srvc_show_dl_list();
             srvc_show_dl_bar();
             gfx_BlitRectangle(gfx_buffer, 60, 120 - (h / 2) - 12, 200, h);
@@ -110,7 +110,7 @@ void conn_HandleInput(packet_t *in_buff, size_t buff_size) {
                 if(settings.flags[HASH_FILES]) {
                     dl_list[curr_dl].status = DL_VERIFY;
                     srvc_show_dl_list();
-                    hashlib_sha1final(&ctx, sha1);
+                    hashlib_Sha1Final(&ctx, sha1);
                     if(memcmp(sha1, packet->sha1, 20)){
                         file_error = true;
                     }

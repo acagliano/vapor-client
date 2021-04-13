@@ -24,6 +24,7 @@
 #include <fileioc.h>
 #include <graphx.h>
 #include <keypadc.h>
+#include <hashlib.h>
 
 // Game Data Types (Structure Definitions)
 #include "ui/content.h"
@@ -61,6 +62,7 @@ int main(void) {
     sk_key_t key=0;
     bool first_loop=true;
     
+    hashlib_SetMalloc(malloc);
     lib_Init();
     gfx_Begin();
    
@@ -103,27 +105,19 @@ int main(void) {
             }
         }
         if(menu_item_selected==MENU_SETTINGS){
-            if(key==sk_Zoom) setting_selected += (setting_selected<8);
+            if(key==sk_Zoom) setting_selected += (setting_selected<6);
             if(key==sk_Window) setting_selected -= (setting_selected>0);
             if(key==sk_Trace) {
-                if(setting_selected<6)
-                    settings.flags[setting_selected] = (!settings.flags[setting_selected]);
-                else if(setting_selected==8){
-                    settings.security_level++;
-                    if(settings.security_level>HIGH) settings.security_level=0;
+                if(setting_selected==5){
+                    uint24_t bitw = settings.rsa_bit_width;
+                    settings.rsa_bit_width = (bitw==256) ? 0 : (bitw>0) ? bitw*2 : 64;
                 }
-                else
-                    strncpy(settings.login_tokens[setting_selected-7], "test", 5);
+                else {
+                    uint8_t editthis = setting_selected;
+                    if(setting_selected==6) editthis--;
+                    settings.flags[editthis] = (!settings.flags[editthis]);
+                }
                 
-            }
-            if(key==sk_Graph){
-                settings_HelpUI(setting_selected);
-            }
-            if(key){
-                if((setting_selected<6) || setting_selected==8)
-                    strncpy(nav_opts_btm[4], "Toggle", 7);
-                else
-                    strncpy(nav_opts_btm[4], "Edit", 5);
             }
         }
         if(key==sk_Clear){

@@ -19,25 +19,16 @@ bool ntwk_init(void) {
 void ntwk_process(void) {
     uint8_t i;
     static size_t packet_size = 0;
-
-    for(i = 0; i < 2 * 1; i++ ) {
-        if(mode->process) mode->process();
-
-        /* If the device was disconnected, exit */
-        if(!netflags.network_up) return;
-
-        /* Handle input */
-        if(packet_size) {
-            if(mode->read_to_size(packet_size)) {
-                ntwk_inactive_clock = 0;
-                conn_HandleInput((packet_t *) &net_buf, packet_size);
-                packet_size = 0;
-            } else break;
-        } else {
-            if(mode->read_to_size(sizeof(packet_size))) packet_size = *(size_t*)net_buf;
-            else break;
-        }
-    }
+    static size_t bytes_read = 0;
+    
+    bytes_read = srl_Read(&srl, net_buf, net_buf_size);
+    if(bytes_read >= sizeof(packet_size)) packet_size = *net_buff;
+    if(packet_size)
+        if(bytes_read >= (packet_size+3))
+            conn_HandleInput(net_buff+3, packet_size);
+    
+    // now what?
+    
 }
 
 bool ntwk_send_(uint8_t num_parts, uint8_t ctrl, ...) {
