@@ -21,11 +21,13 @@ void ntwk_process(void) {
     static size_t packet_size = 0;
     static size_t bytes_read = 0;
     
-    bytes_read = srl_Read(&srl, net_buf, net_buf_size);
+    bytes_read += srl_Read(&srl, net_buf, net_buf_size);
     if(bytes_read >= sizeof(packet_size)) packet_size = *net_buff;
     if(packet_size)
-        if(bytes_read >= (packet_size+3))
+        if(bytes_read >= (packet_size+3)){
             conn_HandleInput(net_buff+3, packet_size);
+            bytes_read = 0; packet_size = 0;
+        }
     
     // now what?
     
