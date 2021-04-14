@@ -8,7 +8,10 @@ _Arc_Unarc     := $021448
 
 _OP1           := $D005F8
 
-;bool load_library(const char *libname);
+extern _frameset
+public _load_library
+
+;bool load_library(const uint8_t *data);
 _load_library:
 	ld	hl,__custom_libloadappvar
 	call	_Mov9ToOP1
@@ -32,10 +35,13 @@ __custom_inarc:
 	inc	hl
 	inc	hl
 	inc	hl
-	ld	de,__custom_relocationstart
+	pop	bc,de
+	push	de,bc
+	ld	bc,__custom_notfound	;libload returns on fail
+	push	bc
 	jp	(hl)
 __custom_notfound:
-	ld a, 0         ; return 0 if we could not load the lib
+	xor a,a         ; return 0 if we could not load the lib
     ret
 __relocationstart:
 ; place library jump locations and headers here
@@ -44,5 +50,3 @@ __relocationstart:
 __custom_libloadappvar:
 	db	" LibLoad",0
 
-;; Where do we return from if we succeed?
-;; Where do we load in the name of the lib to load?
