@@ -24,6 +24,6 @@ EXTRA_CFLAGS ?= -Wall -Wextra
 
 OUTPUT_MAP   ?= YES
 
-LDLIBS ?= $(CEDEV)/lib/libload/graphx.lib $(CEDEV)/lib/libload/fileioc.lib $(CEDEV)/lib/libload/usbdrvce.lib $(CEDEV)/lib/libload/srldrvce.lib $(CEDEV)/lib/libload/keypadc.lib
-
 include $(CEDEV)/meta/makefile.mk
+
+LDLIBS = $(CEDEV)/lib/libload/graphx.lib $(CEDEV)/lib/libload/fileioc.lib $(CEDEV)/lib/libload/usbdrvce.lib $(CEDEV)/lib/libload/srldrvce.lib $(CEDEV)/lib/libload/keypadc.lib
