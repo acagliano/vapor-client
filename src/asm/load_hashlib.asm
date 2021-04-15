@@ -1,6 +1,9 @@
 
 public _load_hashlib
-public _hashlib_init ;make sure each jump has this kind of declaration here and in the header file
+public _hashlib_SetMalloc
+public _hashlib_Sha1Init
+public _hashlib_Sha1Update
+public _hashlib_Sha1Final
 
 extern _load_library
 
@@ -12,10 +15,16 @@ _load_hashlib:
 	pop bc
 	ret
 .data:
-	db "BIGINTCE",0,1 ;BIGINTCE version 1
-_hashlib_init: ;or whatever
+	db "HASHLIB",0,2 ;HASHLIB version 2
+_hashlib_SetMalloc: ;or whatever
 	jp	0
-;follow with more of these jumps for each function offset in library
+_hashlib_Sha1Init:
+    jp  12
+_hashlib_Sha1Update:
+    jp  15
+_hashlib_Sha1Final:
+    jp  18
+; RSA functions when implemented
 
 	pop hl ; libload executes this code on succesful load
 	xor a,a ;return true
