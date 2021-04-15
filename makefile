@@ -9,7 +9,7 @@ MAIN_ARGS    ?= NO
 COMPRESSED   ?= NO
 ARCHIVED     ?= NO
 
-L ?= graphx keypadc srldrvce usbdrvce hashlib
+L ?= graphx keypadc srldrvce usbdrvce
 
 # ----------------------------
 # Compile Options

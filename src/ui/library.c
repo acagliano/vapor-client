@@ -1,10 +1,11 @@
 #include <string.h>
 #include <stdbool.h>
 #include <fileioc.h>
-#include <hashlib.h>
+//#include <hashlib.h>
 #include "content.h"
 #include "library.h"
 #include "../network/srv_types.h"
+#include "../asm/libload_custom.h"
 
 const char library_var[]="VPRLibr";
 const char no_lib_err[]="There are no files in your VAPOR library. You can use the Services tab to the left to search for active servers and their corresponding client software.";

@@ -14,9 +14,9 @@ public _load_library
 ;bool load_library(const uint8_t *name);
 _load_library:
 	ld	hl,__custom_libloadappvar
-	call	_Mov9ToOP1
+	call	_Mov9ToOp1
 	ld	a,21
-	ld	(OP1),a
+	ld	(_OP1),a
 __custom_findlibload:
 	call	_ChkFindSym
 	jp	c,__custom_notfound

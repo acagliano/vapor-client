@@ -4,7 +4,7 @@
 #include <string.h>
 #include <fileioc.h>
 #include <usbdrvce.h>
-#include <hashlib.h>
+//#include <hashlib.h>
 #include "network.h"
 #include "controlcodes.h"
 #include "../ui/content.h"
@@ -13,6 +13,7 @@
 #include "../ui/settings.h"
 #include "srv_types.h"
 #include "../asm/functions.h"
+#include "../asm/libload_custom.h"
 #undef NDEBUG
 #include <debug.h>
 

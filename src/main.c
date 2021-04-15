@@ -24,7 +24,7 @@
 #include <fileioc.h>
 #include <graphx.h>
 #include <keypadc.h>
-#include <hashlib.h>
+//#include <hashlib.h>
 
 // Game Data Types (Structure Definitions)
 #include "ui/content.h"
@@ -36,6 +36,7 @@
 #include "network/network.h"
 #include "asm/functions.h"
 #include "network/srv_types.h"
+#include "asm/libload_custom.h"
 
 // USB Libraries
 #include <usbdrvce.h>
@@ -56,13 +57,19 @@ uint8_t vapor_status=false;
 #define VAPOR_TIMEOUT 2000
 uint24_t vapor_timeout=0;
 bool queue_update=true;
-
+bool hashlib_available=false;
 
 int main(void) {
     sk_key_t key=0;
     bool first_loop=true;
     
-    hashlib_SetMalloc(malloc);
+    if(hashlib_available = load_hashlib())
+        hashlib_SetMalloc(malloc);
+    else {
+        settings.hash_files = false;
+        settings.rsa_depth = 0;
+    }
+        
     lib_Init();
     gfx_Begin();
    
@@ -108,7 +115,7 @@ int main(void) {
             if(key==sk_Zoom) setting_selected += (setting_selected<6);
             if(key==sk_Window) setting_selected -= (setting_selected>0);
             if(key==sk_Trace) {
-                if(setting_selected==5){
+                if(setting_selected==5 && hashlib_available){
                     uint24_t bitw = settings.rsa_bit_width;
                     settings.rsa_bit_width = (bitw==256) ? 0 : (bitw>0) ? bitw*2 : 64;
                 }
@@ -116,6 +123,8 @@ int main(void) {
                     uint8_t editthis = setting_selected;
                     if(setting_selected==6) editthis--;
                     settings.flags[editthis] = (!settings.flags[editthis]);
+                    if(editthis==HASH_FILES && (!hashlib_available))
+                        settings.flags[editthis] = false;
                 }
                 
             }

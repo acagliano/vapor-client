@@ -1,6 +1,9 @@
 #ifndef libload_custom_h
 #define libload_custom_h
 
+#include <stdint.h>
+#include <stdbool.h>
+
 typedef struct _sha1_ctx {
 	uint8_t data[64];
 	uint32_t datalen;
@@ -25,7 +28,7 @@ bool load_hashlib(void);
 //bool load_bigint(void);
 
 
-# HASHLIB DEFINES (FROM HASHLIB.H but here because we control things now. mwahaha)
+// HASHLIB DEFINES (FROM HASHLIB.H but here because we control things now. mwahaha)
 
 void hashlib_SetMalloc(void*(void(*_alloc)(size_t)));
 uint8_t hashlib_Sha1Init(sha1_ctx *ctx);
