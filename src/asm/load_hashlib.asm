@@ -7,6 +7,8 @@ public _hashlib_Sha1Final
 
 extern _load_library
 
+min_version = 1
+
 
 _load_hashlib:
 	ld de,.data
@@ -15,7 +17,7 @@ _load_hashlib:
 	pop bc
 	ret
 .data:
-	db "HASHLIB",0,2 ;HASHLIB version 2
+	db 0xC0,"HASHLIB",0,min_version ;HASHLIB version 2
 _hashlib_SetMalloc: ;or whatever
 	jp	0
 _hashlib_Sha1Init:

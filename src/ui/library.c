@@ -4,6 +4,7 @@
 //#include <hashlib.h>
 #include "content.h"
 #include "library.h"
+#include "settings.h"
 #include "../network/srv_types.h"
 #include "../asm/libload_custom.h"
 
@@ -74,7 +75,8 @@ void lib_Init(void){
         library_t libinfo = {"VAPOR", TI_PPRGM_TYPE, {0}};
         sha1_ctx context;
         ti_var_t tf=ti_OpenVar("VAPOR", "r", TI_PPRGM_TYPE);
-        hashlib_SHA1(ti_GetDataPtr(tf), ti_GetSize(tf), libinfo.sha1);
+        if(settings.hash_files)
+            hashlib_SHA1(ti_GetDataPtr(tf), ti_GetSize(tf), libinfo.sha1);
         ti_Close(tf);
         lf=ti_Open(library_var, "w+");
         ti_Write(&libinfo, sizeof(library_t), 1, lf);

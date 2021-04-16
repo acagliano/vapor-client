@@ -6,9 +6,11 @@
 #include "settings.h"
 #include "content.h"
 #include "../asm/functions.h"
+#include "../gfx/graphics.h"
 
 #define SETTINGSV 1   // increment whenever the settings layout changes
 char settings_appv[] = "VaporSav";
+char hashlib_missing[] = "HASHLIB missing";
 settings_t settings;
 /*
 struct {
@@ -44,8 +46,9 @@ char settings_update_toolchain[] = "Upon program load (and network up) attempt t
 char settings_update_3rdparty[] = "Upon program load (and network up) attempt to update 3rd party libs?";
 char settings_reload_after_upd[] = "Should VAPOR reload itself after a self-update or a library update?";
 char settings_verify_dls[] = "Should VAPOR verify file downloads using SHA-1? This will slow your download. Requires HASHLIB.";
-char settings_rsa_enable[] = "Use RSA? 64, 128, and 256 bit mode avail. Changing mode requires key regen. Keys expire after 30 days. Requires HASHLIB.";
+char settings_rsa_enable[] = "Use RSA? Changing mode requires keygen. Keys expire after 30 days. Requires HASHLIB.";
 char settings_login_token[] = "Generate keypair to auth. with VAPOR-proxied servers? Replaces standard login where supported. Requires HASHLIB.";
+char hashlib_error[] = "HASHLIB REQUIRED. Install HASHLIB (or check 3rd party libs box above and restart VAPOR).";
 
 char* settings_helper_text[] = {
     settings_update_vapor,
@@ -67,11 +70,17 @@ sr_t setting_yval[] = {
     {80+30-15, 145, 8},       // enable login
 };
 
+
 void settings_RenderValueUI(uint8_t opt_id, uint24_t x, uint8_t y){
     bool sett_val = settings.flags[opt_id];
     switch(opt_id){
         case 5:
             {
+                if(!hashlib_available){
+                    gfx_RLETSprite(error, x, y+12);
+                    gfx_PrintStringXY("no impl. defined", x+20, y+12);
+                    break;
+                }
                 uint24_t rsa_depth = settings.rsa_bit_width;
                 uint24_t box_x = (rsa_depth==0) ? 85 : (rsa_depth==64) ? 125 : (rsa_depth==128) ? 185 : 245;
                 uint24_t box_w = (rsa_depth==0) ? 30 : (rsa_depth==64) ? 55 : (rsa_depth==128) ? 62 : 62;
@@ -89,11 +98,15 @@ void settings_RenderValueUI(uint8_t opt_id, uint24_t x, uint8_t y){
             sett_val = settings.flags[opt_id-1];
         default:
             {
-                gfx_Rectangle(x, y, 8, 8);
-                if(sett_val) {
-                    uint8_t color = gfx_SetColor(102);
-                    gfx_FillRectangle(x+1, y+1, 6, 6);
-                    gfx_SetColor(color);
+                if(((opt_id==6) || (opt_id==HASH_FILES)) && (!hashlib_available))
+                        gfx_RLETSprite(error, x, y);
+                else {
+                    gfx_Rectangle(x, y, 8, 8);
+                    if(sett_val) {
+                        uint8_t color = gfx_SetColor(102);
+                        gfx_FillRectangle(x+1, y+1, 6, 6);
+                        gfx_SetColor(color);
+                    }
                 }
             }
             break;
@@ -153,6 +166,9 @@ void settings_Save(void){
 
 void settings_HelpUI(uint8_t item){
     uint8_t y_start=162+10;
-    text_WrappedString(settings_helper_text[item], 85, y_start, 310);
+    if(!hashlib_available && ((item==HASH_FILES) || (item==ENABLE_VAPOR_LOGIN) || (item==6)))
+        text_WrappedString(hashlib_error, 85, y_start, 310);
+    else
+        text_WrappedString(settings_helper_text[item], 85, y_start, 310);
     gfx_BlitRectangle(gfx_buffer, 85, y_start, 320-85, 240-y_start);
 }

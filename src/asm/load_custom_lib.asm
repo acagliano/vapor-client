@@ -39,6 +39,7 @@ __custom_inarc:
 	push	de,bc
 	ld	bc,__custom_notfound	;libload returns on fail
 	push	bc
+    ld  bc, $aa55aa
 	jp	(hl)
 __custom_notfound:
 	xor a,a         ; return 0 if we could not load the lib

@@ -62,7 +62,7 @@ bool hashlib_available=false;
 int main(void) {
     sk_key_t key=0;
     bool first_loop=true;
-    
+   // *(uint8_t*)-1 = 2;
     if(hashlib_available = load_hashlib())
         hashlib_SetMalloc(malloc);
     else {
@@ -115,16 +115,20 @@ int main(void) {
             if(key==sk_Zoom) setting_selected += (setting_selected<6);
             if(key==sk_Window) setting_selected -= (setting_selected>0);
             if(key==sk_Trace) {
-                if(setting_selected==5 && hashlib_available){
-                    uint24_t bitw = settings.rsa_bit_width;
-                    settings.rsa_bit_width = (bitw==256) ? 0 : (bitw>0) ? bitw*2 : 64;
+                if(setting_selected==5){
+                    if(hashlib_available){
+                        uint24_t bitw = settings.rsa_bit_width;
+                        settings.rsa_bit_width = (bitw==256) ? 0 : (bitw>0) ? bitw*2 : 64;
+                    }
                 }
                 else {
                     uint8_t editthis = setting_selected;
                     if(setting_selected==6) editthis--;
                     settings.flags[editthis] = (!settings.flags[editthis]);
-                    if(editthis==HASH_FILES && (!hashlib_available))
-                        settings.flags[editthis] = false;
+                    if(editthis==HASH_FILES || editthis==ENABLE_VAPOR_LOGIN){
+                        if(!hashlib_available)
+                            settings.flags[editthis] = false;
+                    }
                 }
                 
             }

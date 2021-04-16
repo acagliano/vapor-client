@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 
+extern bool hashlib_available;
 
 // This structure is not for VAPOR specifically, but for potentially allowing VAPOR
 // to handle logging into "game" accounts

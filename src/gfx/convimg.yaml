@@ -9,6 +9,7 @@ converts:
         - main_icon
         - vapor_indic
         - encrypted
+        - error
 
 outputs:
     - type: c
